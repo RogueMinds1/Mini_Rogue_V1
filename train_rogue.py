@@ -90,6 +90,6 @@ def train_model(text, epochs=10, batch_size=64, lr=1e-4, block_size=128, update_
     torch.save(model.state_dict(), 'mini_rogue_model.pth')
 
 if __name__ == "__main__":
-    with open(r"C:\RMI-CODE\Models\Mini_Rogue_V1\Mini_Rogue_V1\data\cleaned_text.txt", "r", encoding="utf-8") as f:
+    with open(r"C:\RMI-CODE\Models\Mini_Rogue_V1\Mini_Rogue_V1\cleaned_text.txt", "r", encoding="utf-8") as f:
         text = f.read()
     train_model(text)
