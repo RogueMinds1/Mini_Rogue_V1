@@ -1,4 +1,5 @@
 import re
+from transformers import AutoTokenizer
 
 def clean_text(text):
     """
@@ -9,9 +10,9 @@ def clean_text(text):
     cleaned_text = re.sub(r"[^\w\s]", "", cleaned_text)  # Remove punctuation
     return cleaned_text
 
-def preprocess_data(input_file, output_file):
+def preprocess_data(input_file, output_file, tokenizer_name):
     """
-    Reads a text file, cleans it, builds a vocabulary, and saves the data for training.
+    Reads a text file, cleans it, tokenizes it, and saves the data for training.
     """
     try:
         with open(input_file, "r", encoding="utf-8") as f:
@@ -24,31 +25,22 @@ def preprocess_data(input_file, output_file):
     cleaned_text = clean_text(text)
     print(f"Cleaned text: {cleaned_text[:100]}...")  # Print first 100 characters of cleaned text for verification
 
-    # Build vocabulary
-    vocab = set(cleaned_text.split())
-    vocab_size = len(vocab)
-    print(f"Vocabulary size: {vocab_size}")
+    # Tokenize the cleaned text
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+    tokenized_text = tokenizer(cleaned_text, return_tensors="pt")
 
-    # Save data to new file
+    # Save tokenized text to new file
     try:
         with open(output_file, "w", encoding="utf-8") as f:
-            f.write(cleaned_text)
-        print(f"Saved cleaned text to {output_file}.")
+            f.write(tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(tokenized_text["input_ids"][0])))
+        print(f"Saved tokenized text to {output_file}.")
     except Exception as e:
         print(f"Error writing to output file: {e}")
         return
 
-    # Save vocabulary info
-    try:
-        with open("vocab.txt", "w", encoding="utf-8") as f:
-            f.write(f"Vocabulary Size: {vocab_size}\n")
-            f.write("\n".join(vocab))
-        print("Saved vocabulary to vocab.txt.")
-    except Exception as e:
-        print(f"Error writing to vocab file: {e}")
-
 if __name__ == "__main__":
-    input_file = r"C:\RMI-CODE\Models\Mini_Rogue_V1\Mini_Rogue_V1\OpensourceBooks1.txt"  # Replace with your actual file path
-    output_file = "cleaned_text.txt"
-    preprocess_data(input_file, output_file)
+    input_file = r"/workspaces/Mini_Rogue_V1/OpensourceBooks1.txt"  # Replace with your actual file path
+    output_file = "cleaned_tokenized.txt"
+    tokenizer_name = "bert-base-uncased"  # Choose the tokenizer you want to use
+    preprocess_data(input_file, output_file, tokenizer_name)
     print("Data preprocessing complete!")
